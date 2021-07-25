@@ -1,0 +1,7 @@
+{
+    "name": "Fig Detector",
+    "description": "God I hate figs so much. If only there were a way to distingish them from other fruits. Oh wait. There is.",
+    "endpoint": "/figdetector",
+    "url": "https://detectors.herokuapp.com/figdetector",
+    "class_names": ["apple", "apricot", "avocado", "banana", "bell pepper", "black berry", "blueberry", "cantaloupe", "cherry", "coconut", "coffee", "desert fig", "eggplant", "fig", "grape", "grapefruit", "kiwi", "lemon", "lime", "lychee", "mango", "orange", "pear", "pineapple", "pomegranate", "pumpkin", "raspberry", "strawberry", "watermelon"] 
+}
