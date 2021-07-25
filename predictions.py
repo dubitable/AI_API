@@ -2,7 +2,7 @@ import tensorflow as tf
 import os
 
 def load_model(model_name):
-    model = tf.keras.models.load_model(os.path.join("static", "models", model_name))
+    model = tf.keras.models.load_model(os.path.join("static", model_name, "model"))
     return model
 
 def predict(image, model):
