@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <form id="formElem">
+      <input type="file" name="file">
+      <input type="submit">
+    </form>
+    
+    <script>
+      const local = "http://127.0.0.1:5000/figdetector"
+      const api = "https://detectors.herokuapp.com/figdetector";
+
+      formElem.onsubmit = async (e) => {
+        e.preventDefault();
+        form = new FormData(formElem);
+
+        for (var entry of form.entries()){
+          console.log(entry);
+        }
+
+        let post = {
+          method: 'post',
+          body: form
+        };
+
+        let get = {
+          method: 'GET'
+        }
+
+        fetch(local, post).then((response) => {
+          console.log(response);
+          response.json()
+          .catch(error => {
+            console.log(error);
+          })
+          .then(data => {
+            console.log(data)
+          });
+        })  
+      };
+
+      
+    </script>  
+  </body>
+</html>
