@@ -10,4 +10,4 @@ files = {
 
 
 response = requests.post(local, files=files)
-print(response.content)
+print(response.json())

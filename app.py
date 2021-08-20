@@ -1,20 +1,21 @@
-from flask import Flask, request, jsonify, Response
-from predictions import load_model, predict
+import base64, json, os, io
+
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 from PIL import Image
-import json, os, sys
+
+import numpy as np
+
+from predictions import load_model, predict
 
 models = {
     "fig": load_model("fig")
 }
 
-with open("headers.json", "r") as file:
-    headers = json.loads(file.read())
-
-print(headers)
-
 UPLOAD_FOLDER = "/uploads"
 
 app = Flask(__name__, static_url_path = "/static")
+CORS(app)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def get_info(model_name):
@@ -25,24 +26,35 @@ def get_info(model_name):
 def format_predictions(predictions, model_name):
     predictions = predictions.numpy().tolist()
     info = get_info(model_name)
-    return {class_name : str(prediction) for class_name, prediction in zip(info["class_names"], predictions)}
+    confidences = {class_name : str(prediction) for class_name, prediction in zip(info["class_names"], predictions)}
+    return {
+        "confidences": confidences,
+        "class_name": info["class_names"][np.argmax(predictions)],
+        "value": np.max(predictions)
+    }
 
-def make_response(dictionary):
-    response = Response(json.dumps(dictionary))
-    for key, value in headers.items():
-        response.headers[key] = value
-    return response
 
 @app.route("/figdetector", methods = ["GET", "POST", "OPTIONS"])
 def figdetector():     
     if request.method == "POST":
         file = request.files["file"]
         image = Image.open(file.stream)
-        print(image.size, file=sys.stdout)
         predictions = predict(image, models["fig"])
         formatted_predictions = format_predictions(predictions, "fig")
-        return make_response(formatted_predictions)
-    return make_response(get_info("fig"))
+        return formatted_predictions
+    return get_info("fig")
+
+@app.route("/figdetectorjs", methods = ["GET", "POST", "OPTIONS"])
+def figdetectorjs():     
+    if request.method == "POST":
+        content = request.get_json()
+        b64_image = content["image"]["base64"].replace("data:image/png;base64,", "")
+        bin_image = base64.b64decode(b64_image)
+        image = Image.open(io.BytesIO(bin_image))
+        predictions = predict(image, models["fig"])
+        formatted_predictions = format_predictions(predictions, "fig")
+        return formatted_predictions
+    return get_info("fig")
 
 if __name__ == "__main__":
     app.run()
