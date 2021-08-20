@@ -47,14 +47,13 @@ def figdetector():
 @app.route("/figdetectorjs", methods = ["GET", "POST", "OPTIONS"])
 def figdetectorjs():     
     if request.method == "POST":
-        content = request.get_json()
-        b64_image = content["image"]["uri"].replace("data:image/png;base64,", "")
-        print(content["image"].keys(), file=sys.stdout)
-        print(len(b64_image), len(b64_image) % 4)
+        b64_image = request.get_json()["base64"]
         bin_image = base64.b64decode(b64_image)
         image = Image.open(io.BytesIO(bin_image))
+        print(image.size)
         predictions = predict(image, models["fig"])
         formatted_predictions = format_predictions(predictions, "fig")
+        print(formatted_predictions)
         return formatted_predictions
     return get_info("fig")
 
