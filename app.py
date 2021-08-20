@@ -1,4 +1,4 @@
-import base64, json, os, io
+import base64, json, os, io, sys
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -49,6 +49,10 @@ def figdetectorjs():
     if request.method == "POST":
         content = request.get_json()
         b64_image = content["image"]["uri"].replace("data:image/png;base64,", "")
+        print(b64_image, file=sys.stdout)
+        with open("image", "w") as file:
+            file.write(b64_image)
+        print(len(b64_image), len(b64_image) % 4)
         bin_image = base64.b64decode(b64_image)
         image = Image.open(io.BytesIO(bin_image))
         predictions = predict(image, models["fig"])
