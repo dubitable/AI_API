@@ -18,6 +18,11 @@ app = Flask(__name__, static_url_path = "/static")
 CORS(app)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+def clearfacts():
+    with open("facts.txt", "w") as file: pass
+
+clearfacts()
+
 def get_info(model_name):
     filename = os.path.join("static", model_name, "info.json")
     with open(filename, "r") as file:
@@ -56,6 +61,21 @@ def figdetectorjs():
         print(formatted_predictions)
         return formatted_predictions
     return get_info("fig")
+
+@app.route("/figfacts", methods = ["GET", "POST", "OPTIONS"])
+def fictfacts():
+    if request.method == "POST":
+        json = request.get_json()
+        if "clear" in json.keys():
+            clearfacts()
+        else:
+            fact = json["fact"]
+            with open("facts.txt", "a") as file:
+                file.write(f"{fact}\n")
+
+    with open("facts.txt", "r") as file:
+        facts = [fact for fact in file.read().split("\n") if fact != ""]
+        return jsonify(facts)
 
 if __name__ == "__main__":
     app.run()
