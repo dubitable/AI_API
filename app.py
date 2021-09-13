@@ -63,7 +63,7 @@ def figdetectorjs():
     return get_info("fig")
 
 @app.route("/figfacts", methods = ["GET", "POST", "OPTIONS"])
-def fictfacts():
+def figfacts():
     if request.method == "POST":
         json = request.get_json()
         if "clear" in json.keys():
@@ -76,6 +76,26 @@ def fictfacts():
     with open("facts.txt", "r") as file:
         facts = [fact for fact in file.read().split("\n") if fact != ""]
         return jsonify(facts)
+
+@app.route("/combine", methods = ["GET", "POST", "OPTIONS"])
+def combine():
+    if request.method == "POST":
+        json = request.get_json()
+        images = []
+        for b64 in json["images"]:
+            bin_image = base64.b64decode(b64)
+            images.append(Image.open(io.BytesIO(bin_image)))
+        side, _ = images[0].size
+        image = Image.new("RGB", (side * 4, side * 4))
+        elem = 0
+        for i in range(4):
+            for j in range(4):
+                image.paste(images[elem], (j * side, i * side))
+                elem += 1
+        buffered = io.BytesIO()
+        image.save(buffered, format="JPEG")
+        img_str = base64.b64encode(buffered.getvalue())
+        return jsonify({"combined": str(img_str).removeprefix("b'")})
 
 if __name__ == "__main__":
     app.run()
